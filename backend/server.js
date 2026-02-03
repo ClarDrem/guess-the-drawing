@@ -1,9 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const fetch = require('node-fetch');
 
 const app = express();
 const port = 3001;
+
+// Kimi API配置
+const KIMI_API_KEY = 'sk-U01vHX3koKchyJP1KBYZdjxJpr9hYA8wAirxpwwe2kV1OPGj';
+const KIMI_API_URL = 'https://api.moonshot.cn/v1/chat/completions';
 
 // 中间件
 app.use(cors());
@@ -34,20 +39,73 @@ app.get('/api/word', (req, res) => {
 });
 
 // 处理画作提交和AI猜测
-app.post('/api/guess', (req, res) => {
+app.post('/api/guess', async (req, res) => {
     const { imageData, word } = req.body;
     
-    // 模拟AI猜测（实际项目中会使用真实的AI模型）
-    const guesses = generateRandomGuesses(word);
-    const isCorrect = guesses.includes(word);
-    
-    res.json({ 
-        guesses, 
-        isCorrect 
-    });
+    try {
+        // 使用Kimi API进行图像识别
+        const guesses = await getKimiGuess(imageData);
+        const isCorrect = guesses.some(guess => 
+            guess.toLowerCase().includes(word.toLowerCase()) || 
+            word.toLowerCase().includes(guess.toLowerCase())
+        );
+        
+        res.json({ 
+            guesses, 
+            isCorrect 
+        });
+    } catch (error) {
+        console.error('Kimi API调用失败:', error);
+        // 失败时回退到模拟猜测
+        const guesses = generateRandomGuesses(word);
+        const isCorrect = guesses.includes(word);
+        
+        res.json({ 
+            guesses, 
+            isCorrect 
+        });
+    }
 });
 
-// 生成随机猜测结果
+// 使用Kimi API进行图像识别
+async function getKimiGuess(imageData) {
+    const response = await fetch(KIMI_API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${KIMI_API_KEY}`
+        },
+        body: JSON.stringify({
+            model: 'moonshot-v1-8k',
+            messages: [
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'text',
+                            text: '请识别这张图片画的是什么物体，用中文回答，只需要说出物体名称，不要有其他描述。'
+                        },
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: imageData
+                            }
+                        }
+                    ]
+                }
+            ],
+            temperature: 0.3,
+            max_tokens: 50
+        })
+    });
+    
+    const data = await response.json();
+    const guess = data.choices[0].message.content.trim();
+    // 返回猜测结果，确保至少有一个结果
+    return [guess];
+}
+
+// 生成随机猜测结果（备用）
 function generateRandomGuesses(targetWord) {
     // 70%的概率包含正确答案
     const includeCorrect = Math.random() < 0.7;

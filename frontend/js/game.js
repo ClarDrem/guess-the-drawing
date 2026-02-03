@@ -48,11 +48,44 @@ class Game {
         if (!this.isGameActive) return;
 
         const imageData = this.canvas.getImageData();
-        this.simulateAIGuess(imageData);
+        this.callBackendAPI(imageData);
+    }
+
+    callBackendAPI(imageData) {
+        // 显示加载状态
+        document.getElementById('aiGuess').textContent = 'AI正在识别...';
+        
+        fetch('http://localhost:3001/api/guess', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                imageData: imageData,
+                word: this.currentWord
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const formattedGuesses = data.guesses.map((guess, index) => `${index + 1}. ${guess}`).join('\n');
+            document.getElementById('aiGuess').textContent = formattedGuesses;
+
+            if (data.isCorrect) {
+                this.handleCorrectGuess();
+            } else {
+                this.handleIncorrectGuess();
+            }
+        })
+        .catch(error => {
+            console.error('API调用失败:', error);
+            document.getElementById('aiGuess').textContent = 'API调用失败，使用本地模拟...';
+            // 失败时回退到本地模拟
+            this.simulateAIGuess(imageData);
+        });
     }
 
     simulateAIGuess(imageData) {
-        // 模拟AI猜测（实际项目中会调用后端API）
+        // 模拟AI猜测（API调用失败时的备用方案）
         setTimeout(() => {
             const guesses = this.generateRandomGuesses();
             const formattedGuesses = guesses.map((guess, index) => `${index + 1}. ${guess}`).join('\n');
