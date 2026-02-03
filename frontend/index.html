@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你画我猜 - Guess the Drawing</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- 顶部：目标词语 -->
+        <div class="header">
+            <h1>你画我猜</h1>
+            <div class="target-word">
+                <span class="label">目标词语：</span>
+                <span class="word" id="targetWord">???</span>
+            </div>
+        </div>
+
+        <!-- 中间：游戏区域 -->
+        <div class="game-area">
+            <!-- 左侧：画布 -->
+            <div class="canvas-container">
+                <canvas id="drawingCanvas" width="800" height="600"></canvas>
+            </div>
+
+            <!-- 右侧：工具栏 -->
+            <div class="toolbar">
+                <h3>工具栏</h3>
+                
+                <!-- 颜色选择 -->
+                <div class="tool-section">
+                    <h4>颜色</h4>
+                    <div class="color-picker">
+                        <button class="color-btn" style="background-color: #000000;"></button>
+                        <button class="color-btn" style="background-color: #FF0000;"></button>
+                        <button class="color-btn" style="background-color: #00FF00;"></button>
+                        <button class="color-btn" style="background-color: #0000FF;"></button>
+                        <button class="color-btn" style="background-color: #FFFF00;"></button>
+                        <button class="color-btn" style="background-color: #FF00FF;"></button>
+                        <button class="color-btn" style="background-color: #00FFFF;"></button>
+                        <button class="color-btn" style="background-color: #808080;"></button>
+                    </div>
+                </div>
+
+                <!-- 画笔大小 -->
+                <div class="tool-section">
+                    <h4>画笔大小</h4>
+                    <input type="range" id="brushSize" min="1" max="20" value="5">
+                    <span id="sizeValue">5</span>
+                </div>
+
+                <!-- 工具按钮 -->
+                <div class="tool-section">
+                    <h4>工具</h4>
+                    <button id="brushBtn" class="tool-btn active">画笔</button>
+                    <button id="eraserBtn" class="tool-btn">橡皮擦</button>
+                    <button id="clearBtn" class="tool-btn">清空画布</button>
+                    <button id="submitBtn" class="tool-btn submit">提交画作</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部：结果和得分 -->
+        <div class="footer">
+            <div class="ai-result">
+                <h3>AI猜测结果</h3>
+                <div id="aiGuess" class="guess-result">等待提交...</div>
+            </div>
+            <div class="game-stats">
+                <h3>游戏统计</h3>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="label">得分：</span>
+                        <span id="score">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">用时：</span>
+                        <span id="time">0s</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">连击：</span>
+                        <span id="combo">0</span>
+                    </div>
+                </div>
+                <button id="nextBtn" class="next-btn">下一轮</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/canvas.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
